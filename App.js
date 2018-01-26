@@ -12,12 +12,7 @@ import {
   Text,
   View
 } from 'react-native';
-
-const FBSDK = require('react-native-fbsdk');
-const {
-  LoginButton,
-  AccessToken
-} = FBSDK;
+import FBSDK, { LoginButton, AccessToken } from 'react-native-fbsdk';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' +
