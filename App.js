@@ -13,6 +13,7 @@ import {
   View
 } from 'react-native';
 import FBSDK, { LoginButton, AccessToken } from 'react-native-fbsdk';
+import {GoogleSignin, GoogleSigninButton} from 'react-native-google-signin';
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' +
@@ -21,7 +22,47 @@ const instructions = Platform.select({
     'Shake or press menu button for dev menu',
 });
 
-export default class App extends Component<{}> {
+export default class App extends Component {
+  componentDidMount() {
+    this._setupGoogleSignin();
+  }
+  async _setupGoogleSignin() {
+    try {
+      await GoogleSignin.hasPlayServices({ autoResolve: true });
+      await GoogleSignin.configure({
+        iosClientId: '679164954268-h3f336aaf29nothrbsdlv5rg6qp4oroc.apps.googleusercontent.com',
+        webClientId: '679164954268-h3f336aaf29nothrbsdlv5rg6qp4oroc.apps.googleusercontent.com',
+        offlineAccess: false
+      });
+
+      const user = await GoogleSignin.currentUserAsync();
+      console.log(user);
+      this.setState({user});
+    }
+    catch(err) {
+      console.log("Google signin error", err.code, err.message);
+    }
+  }
+
+  _signIn() {
+    GoogleSignin.signIn()
+      .then((user) => {
+        console.log(user);
+        this.setState({user: user});
+      })
+      .catch((err) => {
+        console.log('WRONG SIGNIN', err);
+      })
+      .done();
+  }
+
+  _signOut() {
+    GoogleSignin.revokeAccess().then(() => GoogleSignin.signOut()).then(() => {
+      this.setState({user: null});
+    })
+      .done();
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -45,6 +86,7 @@ export default class App extends Component<{}> {
               } else {
                 AccessToken.getCurrentAccessToken().then(
                   (data) => {
+                    console.log('data', data);
                     alert(data.accessToken.toString())
                   }
                 )
@@ -52,6 +94,12 @@ export default class App extends Component<{}> {
             }
           }
           onLogoutFinished={() => alert("logout.")}/>
+        <GoogleSigninButton
+          style={{width: 212, height: 48}}
+          size={GoogleSigninButton.Size.Standard}
+          color={GoogleSigninButton.Color.Auto}
+          onPress={this._signIn.bind(this)}
+        />
       </View>
     );
   }
